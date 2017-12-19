@@ -67,22 +67,6 @@ dependencies {
     testCompile 'junit:junit:4.11'
 }
 
-task printDependencies(type: Test) {
-   allprojects.each {
-       println(it.name+':')
-       println('-compile:')
-        configurations.compile.each {
-            c ->
-             println('   '+c.name)
-        }
-       println '-testCompile:'
-       configurations.testCompile.each {
-           r->
-           println('   '+ r.name)
-       }
-    }
-
-}
 
 sourceSets {
     integrationTest {
@@ -113,7 +97,6 @@ task integrationTest(type: Test) {
 }
 
 check.dependsOn integrationTest
-check.dependsOn printDependencies
 sourceSets.main.compileClasspath += configurations.provided
 
 task wrapper(type: Wrapper) {
