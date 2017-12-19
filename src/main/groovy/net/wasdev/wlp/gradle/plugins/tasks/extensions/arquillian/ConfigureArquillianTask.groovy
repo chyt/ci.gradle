@@ -39,9 +39,9 @@ import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
 import net.wasdev.wlp.gradle.plugins.tasks.extensions.arquillian.ConfigureArquillianTask.TypeProperty
 
 class ConfigureArquillianTask extends AbstractServerTask {
-	
+
 	Map<String, String> arquillianProperties;
-	
+
 
 	public TypeProperty type = TypeProperty.NOTFOUND
 	public enum TypeProperty {
@@ -52,37 +52,36 @@ class ConfigureArquillianTask extends AbstractServerTask {
 
 	@Input
 	public Map<String, String> arquillianProperties = null;
-	
-	
+
+
 	@TaskAction
 	void doExecute() throws GradleException {
 		File arquillianXml = new File(project.getBuildDir(), "resources/test/arquillian.xml");
-	      ArrayList<File> deps = new ArrayList<File>();
-	      project.configurations.testCompile.each {
-			  
-			  if(it.toString().contains("arquillian-wlp-remote")) {
-				  type = TypeProperty.REMOTE
-			  }
-			  else if(it.toString().contains("arquillian-wlp-managed")) {
-				  type = TypeProperty.MANAGED
-			  }
-			  
-//			  println("---------------------------------" + it)
-	      }
+		ArrayList<File> deps = new ArrayList<File>();
+		project.configurations.testCompile.each {
+
+			if(it.toString().contains("arquillian-wlp-remote")) {
+				type = TypeProperty.REMOTE
+			}
+			else if(it.toString().contains("arquillian-wlp-managed")) {
+				type = TypeProperty.MANAGED
+			}
+		}
+
 		if (skipIfArquillianXmlExists && arquillianXml.exists()) {
 			//			logger.info(project.getDependencies())
 
 			logger.info(
 					"Skipping configure-arquillian task because arquillian.xml already exists in \"build/test-classes\".");
 		} else {
-			
+
 			if(type == TypeProperty.MANAGED) {
 				configureArquillianManaged(arquillianXml);
 			}
 			if(type == TypeProperty.REMOTE) {
 				configureArquillianRemote(arquillianXml);
 			}
-			
+
 			logger.info(
 					"Not skipping configure-arquillian task because arquillian.xml already exists in \"build/test-classes\".");
 		}
