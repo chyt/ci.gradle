@@ -43,7 +43,7 @@ class ConfigureArquillianTask extends AbstractServerTask {
 	Map<String, String> arquillianProperties;
 	
 
-	public TypeProperty type = TypeProperty.REMOTE
+	public TypeProperty type = TypeProperty.NOTFOUND
 	public enum TypeProperty {
 		MANAGED, REMOTE, NOTFOUND;
 	}
@@ -58,8 +58,17 @@ class ConfigureArquillianTask extends AbstractServerTask {
 	void doExecute() throws GradleException {
 		File arquillianXml = new File(project.getBuildDir(), "resources/test/arquillian.xml");
 	      ArrayList<File> deps = new ArrayList<File>();
-	      project.configurations.testCompile.each {println("---------------------------------" + it)}
-		  
+	      project.configurations.testCompile.each {
+			  
+			  if(it.toString().contains("arquillian-wlp-remote")) {
+				  type = TypeProperty.REMOTE
+			  }
+			  else if(it.toString().contains("arquillian-wlp-managed")) {
+				  type = TypeProperty.MANAGED
+			  }
+			  
+//			  println("---------------------------------" + it)
+	      }
 		if (skipIfArquillianXmlExists && arquillianXml.exists()) {
 			//			logger.info(project.getDependencies())
 
@@ -68,7 +77,7 @@ class ConfigureArquillianTask extends AbstractServerTask {
 		} else {
 			
 			if(type == TypeProperty.MANAGED) {
-			configureArquillianManaged(arquillianXml);
+				configureArquillianManaged(arquillianXml);
 			}
 			if(type == TypeProperty.REMOTE) {
 				configureArquillianRemote(arquillianXml);
