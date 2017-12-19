@@ -46,7 +46,6 @@ class ConfigureArquillianTask extends AbstractServerTask {
 	@TaskAction
 	void doExecute() throws GradleException {
 		File arquillianXml = new File(project.getBuildDir(), "resources/test/arquillian.xml");
-		ArrayList<File> deps = new ArrayList<File>();
 		project.configurations.testCompile.each {
 
 			if(it.toString().contains("arquillian-wlp-remote")) {
