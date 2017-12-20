@@ -19,8 +19,8 @@ import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
 
 class ConfigureArquillianTask extends AbstractServerTask {
 
-    private TypeProperty type = TypeProperty.NOTFOUND
-    private enum TypeProperty {
+    public TypeProperty type = TypeProperty.NOTFOUND
+    public enum TypeProperty {
         MANAGED, REMOTE, NOTFOUND;
     }
     
@@ -33,15 +33,22 @@ class ConfigureArquillianTask extends AbstractServerTask {
     @TaskAction
     void doExecute() throws GradleException {
         File arquillianXml = new File(project.getBuildDir(), "resources/test/arquillian.xml");
-        project.configurations.testCompile.each {
+        project.configurations.testCompile.find {
 
-            if (it.toString().contains("arquillian-wlp-remote")) {
+            if (it.toString().contains(Constants.ARQUILLIAN_REMOTE_DEPENDENCY)) {
                 type = TypeProperty.REMOTE;
-                return;
-            } else if (it.toString().contains("arquillian-wlp-managed")) {
-                type = TypeProperty.MANAGED
-                return;
+                return true;
             }
+            if (it.toString().contains(Constants.ARQUILLIAN_MANAGED_DEPENDENCY)) {
+                type = TypeProperty.MANAGED
+                return true;
+            }
+            return false;
+        }
+
+        if(type == TypeProperty.NOTFOUND) {
+            log.warn("Arquillian Liberty Managed and Remote dependencies were not found. Defaulting to use the Liberty Managed container.");
+            type = TypeProperty.MANAGED;
         }
 
         if (skipIfArquillianXmlExists && arquillianXml.exists()) {
@@ -49,14 +56,11 @@ class ConfigureArquillianTask extends AbstractServerTask {
                     "Skipping configure-arquillian task because arquillian.xml already exists in \"build/resources/test\".");
         } else {
             switch (type) {
-                case TypeProperty.MANAGED:
-                    configureArquillianManaged(arquillianXml);
-                    break;
                 case TypeProperty.REMOTE:
                     configureArquillianRemote(arquillianXml);
                     break;
                 default:
-                    throw new MojoExecutionException("This should never happen.");
+                    configureArquillianManaged(arquillianXml);
             }
         }
     }
