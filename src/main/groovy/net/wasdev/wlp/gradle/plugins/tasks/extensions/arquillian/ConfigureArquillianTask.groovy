@@ -48,10 +48,10 @@ class ConfigureArquillianTask extends AbstractServerTask {
 		File arquillianXml = new File(project.getBuildDir(), "resources/test/arquillian.xml");
 		project.configurations.testCompile.each {
 
-			if(it.toString().contains("arquillian-wlp-remote")) {
+			if(it.toString().contains(Constants.ARQUILLIAN_REMOTE_DEPENDENCY)) {
 				type = TypeProperty.REMOTE
 			}
-			else if(it.toString().contains("arquillian-wlp-managed")) {
+			else if(it.toString().contains(Constants.ARQUILLIAN_MANAGED_DEPENDENCY)) {
 				type = TypeProperty.MANAGED
 			}
 		}
