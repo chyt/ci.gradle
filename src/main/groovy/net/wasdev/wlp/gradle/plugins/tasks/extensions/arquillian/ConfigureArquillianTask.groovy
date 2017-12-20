@@ -1,14 +1,8 @@
 package net.wasdev.wlp.gradle.plugins.tasks.extensions.arquillian;
 
-import org.w3c.dom.Element
-import net.wasdev.wlp.gradle.plugins.utils.LooseWarApplication
-import org.gradle.api.Project
-import org.gradle.api.Task
-import org.apache.commons.io.FileUtils;
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.util.Map.Entry
 import javax.xml.parsers.ParserConfigurationException
 import javax.xml.xpath.XPathExpressionException
 import org.gradle.api.GradleException
