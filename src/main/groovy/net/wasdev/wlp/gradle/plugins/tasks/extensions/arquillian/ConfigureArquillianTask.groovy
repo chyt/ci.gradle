@@ -59,8 +59,6 @@ class ConfigureArquillianTask extends AbstractServerTask {
                 default:
                     throw new GradleException("This should never happen.");
             }
-            logger.info(
-                    "Not skipping configure-arquillian task because arquillian.xml already exists in \"build/test-classes\".");
         }
     }
 
