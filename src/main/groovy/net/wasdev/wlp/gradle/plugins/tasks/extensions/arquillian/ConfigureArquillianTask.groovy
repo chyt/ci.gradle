@@ -16,12 +16,11 @@ import net.wasdev.wlp.common.arquillian.util.ArquillianConfigurationException
 import net.wasdev.wlp.common.arquillian.util.Constants
 import net.wasdev.wlp.common.arquillian.util.HttpPortUtil
 import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
-import net.wasdev.wlp.gradle.plugins.tasks.extensions.arquillian.ConfigureArquillianTask.TypeProperty
 
 class ConfigureArquillianTask extends AbstractServerTask {
 
-    public TypeProperty type = TypeProperty.NOTFOUND
-    public enum TypeProperty {
+    private TypeProperty type = TypeProperty.NOTFOUND
+    private enum TypeProperty {
         MANAGED, REMOTE, NOTFOUND;
     }
     
@@ -36,11 +35,10 @@ class ConfigureArquillianTask extends AbstractServerTask {
         File arquillianXml = new File(project.getBuildDir(), "resources/test/arquillian.xml");
         project.configurations.testCompile.each {
 
-            if(it.toString().contains("arquillian-wlp-remote")) {
+            if (it.toString().contains("arquillian-wlp-remote")) {
                 type = TypeProperty.REMOTE;
                 return;
-            }
-            else if(it.toString().contains("arquillian-wlp-managed")) {
+            } else if (it.toString().contains("arquillian-wlp-managed")) {
                 type = TypeProperty.MANAGED
                 return;
             }
@@ -50,11 +48,15 @@ class ConfigureArquillianTask extends AbstractServerTask {
             logger.info(
                     "Skipping configure-arquillian task because arquillian.xml already exists in \"build/resources/test\".");
         } else {
-            if(type == TypeProperty.MANAGED) {
-                configureArquillianManaged(arquillianXml);
-            }
-            if(type == TypeProperty.REMOTE) {
-                configureArquillianRemote(arquillianXml);
+            switch (type) {
+                case TypeProperty.MANAGED:
+                    configureArquillianManaged(arquillianXml);
+                    break;
+                case TypeProperty.REMOTE:
+                    configureArquillianRemote(arquillianXml);
+                    break;
+                default:
+                    throw new MojoExecutionException("This should never happen.");
             }
         }
     }
@@ -64,7 +66,7 @@ class ConfigureArquillianTask extends AbstractServerTask {
             LibertyManagedObject arquillianManaged = new LibertyManagedObject(getInstallDir(project).getCanonicalPath(), getServer().name,
                     getHttpPort(), LibertyProperty.getArquillianProperties(arquillianProperties, LibertyManagedObject.LibertyManagedProperty.class));
             arquillianManaged.build(arquillianXml);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new GradleException("Error configuring Arquillian.", e);
         }
     }
@@ -73,7 +75,7 @@ class ConfigureArquillianTask extends AbstractServerTask {
         try {
             LibertyRemoteObject arquillianRemote = new LibertyRemoteObject(LibertyProperty.getArquillianProperties(arquillianProperties, LibertyRemoteObject.LibertyRemoteProperty.class));
             arquillianRemote.build(arquillianXml);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new GradleException("Error configuring Arquillian.", e);
         }
     }
@@ -87,7 +89,7 @@ class ConfigureArquillianTask extends AbstractServerTask {
      * @throws FileNotFoundException
      * @throws ArquillianConfigurationException
      */
-    private int getHttpPort() throws FileNotFoundException, XPathExpressionException, IOException, ParserConfigurationException, SAXException, ArquillianConfigurationException {
+     private int getHttpPort() throws FileNotFoundException, XPathExpressionException, IOException, ParserConfigurationException, SAXException, ArquillianConfigurationException {
         String serverDirectory = getServerDir(project);
         File serverXML = new File(serverDirectory + "/server.xml");
         File bootstrapProperties = new File(serverDirectory + "/bootstrap.properties");
