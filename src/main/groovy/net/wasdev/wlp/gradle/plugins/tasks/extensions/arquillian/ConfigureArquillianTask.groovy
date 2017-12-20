@@ -9,7 +9,6 @@ import javax.xml.xpath.XPathExpressionException
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
-import org.gradle.internal.impldep.bsh.This
 import org.xml.sax.SAXException
 import net.wasdev.wlp.common.arquillian.objects.LibertyProperty;
 import net.wasdev.wlp.common.arquillian.objects.LibertyRemoteObject
