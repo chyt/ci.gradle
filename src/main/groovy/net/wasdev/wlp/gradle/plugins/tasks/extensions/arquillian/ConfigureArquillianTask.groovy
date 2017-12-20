@@ -1,6 +1,5 @@
 package net.wasdev.wlp.gradle.plugins.tasks.extensions.arquillian;
 
-import org.gradle.api.internal.artifacts.dsl.dependencies.DefaultDependencyHandler
 import org.gradle.api.internal.tasks.TaskDependencyInternal
 import org.w3c.dom.Element
 import net.wasdev.wlp.gradle.plugins.utils.LooseWarApplication
@@ -17,7 +16,6 @@ import javax.xml.xpath.XPathExpressionException
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
-import org.gradle.internal.impldep.bsh.This
 import org.xml.sax.SAXException
 import net.wasdev.wlp.common.arquillian.objects.LibertyProperty;
 import net.wasdev.wlp.common.arquillian.objects.LibertyRemoteObject
