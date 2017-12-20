@@ -1,5 +1,13 @@
 package net.wasdev.wlp.gradle.plugins.tasks.extensions.arquillian;
 
+import org.gradle.api.internal.artifacts.dsl.dependencies.DefaultDependencyHandler
+import org.gradle.api.internal.tasks.TaskDependencyInternal
+import org.w3c.dom.Element
+import net.wasdev.wlp.gradle.plugins.utils.LooseWarApplication
+import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.apache.commons.io.FileUtils;
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -9,15 +17,16 @@ import javax.xml.xpath.XPathExpressionException
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
+import org.gradle.internal.impldep.bsh.This
 import org.xml.sax.SAXException
 import net.wasdev.wlp.common.arquillian.objects.LibertyProperty;
 import net.wasdev.wlp.common.arquillian.objects.LibertyRemoteObject
 import net.wasdev.wlp.common.arquillian.objects.LibertyManagedObject
-import net.wasdev.wlp.common.arquillian.objects.LibertyProperty
 import net.wasdev.wlp.common.arquillian.util.ArquillianConfigurationException
 import net.wasdev.wlp.common.arquillian.util.Constants
 import net.wasdev.wlp.common.arquillian.util.HttpPortUtil
 import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
+import net.wasdev.wlp.gradle.plugins.tasks.extensions.arquillian.ConfigureArquillianTask.TypeProperty
 
 class ConfigureArquillianTask extends AbstractServerTask {
 
@@ -25,6 +34,7 @@ class ConfigureArquillianTask extends AbstractServerTask {
     public enum TypeProperty {
         MANAGED, REMOTE, NOTFOUND;
     }
+    
     @Input
     public boolean skipIfArquillianXmlExists = false;
 
@@ -36,10 +46,11 @@ class ConfigureArquillianTask extends AbstractServerTask {
         File arquillianXml = new File(project.getBuildDir(), "resources/test/arquillian.xml");
         project.configurations.testCompile.each {
 
-            if (it.toString().contains(Constants.ARQUILLIAN_REMOTE_DEPENDENCY)) {
-                type = TypeProperty.REMOTE
+            if(it.toString().contains("arquillian-wlp-remote")) {
+                type = TypeProperty.REMOTE;
                 return;
-            } else if (it.toString().contains(Constants.ARQUILLIAN_MANAGED_DEPENDENCY)) {
+            }
+            else if(it.toString().contains("arquillian-wlp-managed")) {
                 type = TypeProperty.MANAGED
                 return;
             }
@@ -47,17 +58,13 @@ class ConfigureArquillianTask extends AbstractServerTask {
 
         if (skipIfArquillianXmlExists && arquillianXml.exists()) {
             logger.info(
-                    "Skipping configure-arquillian task because arquillian.xml already exists in \"build/test-classes\".");
+                    "Skipping configure-arquillian task because arquillian.xml already exists in \"build/resources/test\".");
         } else {
-            switch (type) {
-                case TypeProperty.MANAGED:
-                    configureArquillianManaged(arquillianXml);
-                    break;
-                case TypeProperty.REMOTE:
-                    configureArquillianRemote(arquillianXml);
-                    break;
-                default:
-                    throw new GradleException("This should never happen.");
+            if(type == TypeProperty.MANAGED) {
+                configureArquillianManaged(arquillianXml);
+            }
+            if(type == TypeProperty.REMOTE) {
+                configureArquillianRemote(arquillianXml);
             }
         }
     }
@@ -67,7 +74,7 @@ class ConfigureArquillianTask extends AbstractServerTask {
             LibertyManagedObject arquillianManaged = new LibertyManagedObject(getInstallDir(project).getCanonicalPath(), getServer().name,
                     getHttpPort(), LibertyProperty.getArquillianProperties(arquillianProperties, LibertyManagedObject.LibertyManagedProperty.class));
             arquillianManaged.build(arquillianXml);
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw new GradleException("Error configuring Arquillian.", e);
         }
     }
@@ -76,7 +83,7 @@ class ConfigureArquillianTask extends AbstractServerTask {
         try {
             LibertyRemoteObject arquillianRemote = new LibertyRemoteObject(LibertyProperty.getArquillianProperties(arquillianProperties, LibertyRemoteObject.LibertyRemoteProperty.class));
             arquillianRemote.build(arquillianXml);
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw new GradleException("Error configuring Arquillian.", e);
         }
     }
