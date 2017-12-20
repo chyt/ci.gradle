@@ -31,78 +31,77 @@ import net.wasdev.wlp.gradle.plugins.tasks.extensions.arquillian.ConfigureArquil
 
 class ConfigureArquillianTask extends AbstractServerTask {
 
-	Map<String, String> arquillianProperties;
+    Map<String, String> arquillianProperties;
 
-	public TypeProperty type = TypeProperty.NOTFOUND
-	public enum TypeProperty {
-		MANAGED, REMOTE, NOTFOUND;
-	}
-	@Input
-	public boolean skipIfArquillianXmlExists = false;
+    public TypeProperty type = TypeProperty.NOTFOUND
+    public enum TypeProperty {
+        MANAGED, REMOTE, NOTFOUND;
+    }
+    @Input
+    public boolean skipIfArquillianXmlExists = false;
 
-	@Input
-	public Map<String, String> arquillianProperties = null;
+    @Input
+    public Map<String, String> arquillianProperties = null;
 
-	@TaskAction
-	void doExecute() throws GradleException {
-		File arquillianXml = new File(project.getBuildDir(), "resources/test/arquillian.xml");
-		project.configurations.testCompile.each {
+    @TaskAction
+    void doExecute() throws GradleException {
+        File arquillianXml = new File(project.getBuildDir(), "resources/test/arquillian.xml");
+        project.configurations.testCompile.each {
 
-			if(it.toString().contains(Constants.ARQUILLIAN_REMOTE_DEPENDENCY)) {
-				type = TypeProperty.REMOTE
-			}
-			else if(it.toString().contains(Constants.ARQUILLIAN_MANAGED_DEPENDENCY)) {
-				type = TypeProperty.MANAGED
-			}
-		}
+            if (it.toString().contains(Constants.ARQUILLIAN_REMOTE_DEPENDENCY)) {
+                type = TypeProperty.REMOTE
+            } else if (it.toString().contains(Constants.ARQUILLIAN_MANAGED_DEPENDENCY)) {
+                type = TypeProperty.MANAGED
+            }
+        }
 
-		if (skipIfArquillianXmlExists && arquillianXml.exists()) {
-			logger.info(
-					"Skipping configure-arquillian task because arquillian.xml already exists in \"build/test-classes\".");
-		} else {
-			if(type == TypeProperty.MANAGED) {
-				configureArquillianManaged(arquillianXml);
-			}
-			if(type == TypeProperty.REMOTE) {
-				configureArquillianRemote(arquillianXml);
-			}
-			logger.info(
-					"Not skipping configure-arquillian task because arquillian.xml already exists in \"build/test-classes\".");
-		}
-	}
+        if (skipIfArquillianXmlExists && arquillianXml.exists()) {
+            logger.info(
+                    "Skipping configure-arquillian task because arquillian.xml already exists in \"build/test-classes\".");
+        } else {
+            if (type == TypeProperty.MANAGED) {
+                configureArquillianManaged(arquillianXml);
+            }
+            if (type == TypeProperty.REMOTE) {
+                configureArquillianRemote(arquillianXml);
+            }
+            logger.info(
+                    "Not skipping configure-arquillian task because arquillian.xml already exists in \"build/test-classes\".");
+        }
+    }
 
-	private void configureArquillianManaged(File arquillianXml) throws GradleException {
-		try {
-			LibertyManagedObject arquillianManaged = new LibertyManagedObject(getInstallDir(project).getCanonicalPath(), getServer().name,
-					getHttpPort(), LibertyProperty.getArquillianProperties(arquillianProperties, LibertyManagedObject.LibertyManagedProperty.class));
-			arquillianManaged.build(arquillianXml);
-		} catch(Exception e) {
-			throw new GradleException("Error configuring Arquillian.", e);
-		}
-	}
+    private void configureArquillianManaged(File arquillianXml) throws GradleException {
+        try {
+            LibertyManagedObject arquillianManaged = new LibertyManagedObject(getInstallDir(project).getCanonicalPath(), getServer().name,
+                    getHttpPort(), LibertyProperty.getArquillianProperties(arquillianProperties, LibertyManagedObject.LibertyManagedProperty.class));
+            arquillianManaged.build(arquillianXml);
+        } catch (Exception e) {
+            throw new GradleException("Error configuring Arquillian.", e);
+        }
+    }
 
-	private void configureArquillianRemote(File arquillianXml) throws GradleException {
-		try {
-			LibertyRemoteObject arquillianRemote = new LibertyRemoteObject(LibertyProperty.getArquillianProperties(arquillianProperties, LibertyRemoteObject.LibertyRemoteProperty.class));
-			arquillianRemote.build(arquillianXml);
-		} catch(Exception e) {
-			throw new GradleException("Error configuring Arquillian.", e);
-		}
-	}
+    private void configureArquillianRemote(File arquillianXml) throws GradleException {
+        try {
+            LibertyRemoteObject arquillianRemote = new LibertyRemoteObject(LibertyProperty.getArquillianProperties(arquillianProperties, LibertyRemoteObject.LibertyRemoteProperty.class));
+            arquillianRemote.build(arquillianXml);
+        } catch (Exception e) {
+            throw new GradleException("Error configuring Arquillian.", e);
+        }
+    }
 
-	/**
-	 * @return the HTTP port that the managed Liberty server is running on.
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws IOException
-	 * @throws XPathExpressionException
-	 * @throws FileNotFoundException
-	 * @throws ArquillianConfigurationException
-	 */
-	private int getHttpPort() throws FileNotFoundException, XPathExpressionException, IOException, ParserConfigurationException, SAXException, ArquillianConfigurationException {
-		String serverDirectory = getServerDir(project);
-		File serverXML = new File(serverDirectory + "/server.xml");
-		File bootstrapProperties = new File(serverDirectory + "/bootstrap.properties");
-		return HttpPortUtil.getHttpPort(serverXML, bootstrapProperties);
-	}
+    /**
+     * @return the HTTP port that the managed Liberty server is running on.
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     * @throws IOException
+     * @throws XPathExpressionException
+     * @throws FileNotFoundException
+     * @throws ArquillianConfigurationException
+     */
+    private int getHttpPort() throws FileNotFoundException, XPathExpressionException, IOException, ParserConfigurationException, SAXException, ArquillianConfigurationException {
+        String serverDirectory = getServerDir(project);
+        File serverXML = new File(serverDirectory + "/server.xml");
+        File bootstrapProperties = new File(serverDirectory + "/bootstrap.properties");
+        return HttpPortUtil.getHttpPort(serverXML, bootstrapProperties);
+    }
 }
